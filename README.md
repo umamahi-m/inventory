@@ -47,7 +47,9 @@ Documentation:
 Postman collection will provide a collection of APIs with sample requests and responses for testing and demonstration purposes.
 
 To do tasks:
-1.For User Interaction 
+
+1.For User Interaction
+
   Can store user credentials (password in encrypted format) & Account details with orders, payment informations like saved cards, Favourite products
   Web page to show all the inventory information and place order
   Cart functionality & check out features
@@ -55,6 +57,7 @@ To do tasks:
   Schedulers send notifications  when the previously visited out of stock item is in stock.
 
 2.For security
+
    User login verification.
    MFA verification.
    JWT(Json Web Token) for session handling and captcha based verification during signin to avoid DOS attacks.
@@ -63,11 +66,13 @@ To do tasks:
    Unit tests.
 
 3.Scalability
+
   To handle multiple user requests can use a Caching mechanisam based on the load to store some details. After the data updated in DB, cache data will be repopulated for that particular data.
   Vertical scaling to add new DB machines & App servers to support huge volume of data
   Load balancer to route the requests.For example using user id / session id
 
 4.Admin handling
+
   To add / update / deelete inventory details  seperate admin console & access permissions.
   To block / unblock user.
   
