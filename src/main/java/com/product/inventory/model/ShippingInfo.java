@@ -23,7 +23,8 @@ public class ShippingInfo {
     private String countryCode;
 	private float rate;
 	
-	@OneToMany(mappedBy = "shippingInfo",fetch = FetchType.LAZY)
+	//One country can have multiple products. So OneToMany relation.
+	@OneToMany(mappedBy = "shippingInfo",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
 	@JsonManagedReference
     private List<Product> products;
 	

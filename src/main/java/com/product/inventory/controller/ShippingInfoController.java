@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.product.inventory.model.Product;
+import com.product.inventory.model.ProductService;
 import com.product.inventory.model.ShippingInfo;
 import com.product.inventory.model.ShippingInfoService;
 
@@ -17,7 +19,9 @@ public class ShippingInfoController {
 
 	@Autowired
 	private ShippingInfoService shippingInfoService;
-
+	@Autowired
+	ProductService productService;
+	
 	// Create ShippingInfo
 	@PostMapping("/shipping-info")
 	public ResponseEntity<?> createShippingInfo(@RequestBody ShippingInfo shippingInfo) {
@@ -62,10 +66,21 @@ public class ShippingInfoController {
 		} 
 	}
 
-
 	// Delete ShippingInfo
 	@DeleteMapping("/shipping-info/{id}")
 	public ResponseEntity<?> deleteShippingInfo(@PathVariable int id) {
+		ShippingInfo shippingInfo = shippingInfoService.getShippingInfoById(id);
+
+		//mark the product as unavailable before deletion of shipping country to avoid deletion of child records.
+		List<Product> products = shippingInfo.getProducts();
+		for(Product product : products) {
+			product.setShippingInfo(null);
+			product.setStatus("Unavailable");
+			productService.updateProduct(product.getId(), product);
+		}
+
+		shippingInfo.setProducts(null);
+		shippingInfoService.updateShippingInfo(id, shippingInfo);
 		shippingInfoService.deleteShippingInfo(id);
 		return new ResponseEntity<>("Record deleted successfully",HttpStatus.OK);
 	}

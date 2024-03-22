@@ -48,7 +48,7 @@ public class ProductController {
 	}
 
 	@GetMapping("/products/{id}")
-	public ResponseEntity<?> getShippingInfoById(int id) {
+	public ResponseEntity<?> getShippingInfoById(@PathVariable("id") int id) {
 		Product product =  productService.getProductById(id);
 		if(product == null) {
 			return new ResponseEntity<>("Invalid product id.Check and try again", HttpStatus.BAD_REQUEST);

@@ -23,6 +23,7 @@ public class Product {
 	private double weight;
 	private double price;
 	private String status;
+	//Many products have one shipping country. so ManyToOne relationship
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipping_info_id")
     @JsonBackReference

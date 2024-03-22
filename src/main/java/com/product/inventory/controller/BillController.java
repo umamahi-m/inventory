@@ -1,5 +1,6 @@
 package com.product.inventory.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +18,23 @@ import com.product.inventory.model.ProductService;
 public class BillController {
 	@Autowired
 	ProductService productService;
+	
 	@PostMapping("api/generate-bill")
 	public ResponseEntity<?> generateBill(@RequestBody List<Product> productsList) {
 		// Fetch products from database based on productIds
-		List<Product> products = productService.getProductsByIds(productsList);
-
+		List<Product> products = new ArrayList<Product>();
+		try {
+			products = productService.getProductsByIds(productsList);
+		}catch(Exception e) {
+			return new ResponseEntity<>("No products found",HttpStatus.BAD_REQUEST);
+		}
+		
+		if(products == null || products.size() == 0) {
+			return new ResponseEntity<>("No products found",HttpStatus.BAD_REQUEST);
+		}
+		
 		for (Product product : products) {
-			//if multiple products are not availble need to send the error with list of products
+			//if multiple products are not available need to send the error with list of products
 			if(!product.getStatus().equalsIgnoreCase("Available")) {
 				return new ResponseEntity<>("Product " + product.getName()+" is not available currently.Please remove it to proceed further",HttpStatus.BAD_REQUEST);
 			}
@@ -32,7 +43,7 @@ public class BillController {
 				return new ResponseEntity<>("Product " + product.getName()+" is not available with the required quantity. Available quantity is : "+product.getQuantity(),HttpStatus.BAD_REQUEST);
 			}
 		}
-		
+
 		// Calculate total price with discounts
 		double subtotal=0,discounts=0,jacketPrice=0,shippingFees=0;
 		long topsCount = 0, jacketsCount = 0;
@@ -40,6 +51,7 @@ public class BillController {
 		for (Product product : products) {
 			Product requestedProduct = productsList.stream().filter(p -> p.getName().equalsIgnoreCase(product.getName())).findFirst().get();
 
+			//reducing the quantity of product after purchase/ bill generation
 			product.setQuantity(product.getQuantity() - requestedProduct.getQuantity());
 			productService.updateProduct(product.getId(), product);
 
@@ -62,7 +74,6 @@ public class BillController {
 			discounts += jacketPrice * 0.5;
 		}
 
-
 		// Apply shipping discount
 		// Buy two or more items and get a maximum of 100 INR off on shipping fees
 		if (products.size() >=2 && shippingFees > 100.0) {
@@ -76,7 +87,6 @@ public class BillController {
 		double tax = totalPriceAfterDiscountsAndShipping * 0.18;
 		double totalPrice = totalPriceAfterDiscountsAndShipping + tax;
 
-		// Return the bill
 		return new ResponseEntity<>(new Bill(roundOfValue(subtotal), roundOfValue(shippingFees), roundOfValue(tax),roundOfValue(totalPrice), roundOfValue(discounts)),HttpStatus.OK);
 	}
 
